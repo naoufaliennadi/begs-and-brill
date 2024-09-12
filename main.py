@@ -4,7 +4,8 @@ import numpy as np
 
 
 # All the stuff inside your window.
-layout = [[sg.Text("Pipe diameter"),sg.InputText(size=(10,1)),sg.Text("m")],
+layout = [[sg.Frame('',[[sg.Button("Switch mode"),sg.Text("Metric")]])],
+          [sg.Text("Pipe diameter"),sg.InputText(size=(10,1)),sg.Text("m")],
           [sg.Text("Pipe roughness"),sg.InputText(size=(10,1)),sg.Text("m")],
           [sg.Text("Pipe angle"),sg.InputText(size=(10,1)),sg.Text("degrees")],
           [sg.Text("")],
@@ -22,6 +23,9 @@ layout = [[sg.Text("Pipe diameter"),sg.InputText(size=(10,1)),sg.Text("m")],
 # Create the Window
 window = sg.Window('Hello Example', layout)
 
+# starting the calculator
+calc = bbmath.pgcalc()
+
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
     event, values = window.read()
@@ -30,7 +34,12 @@ while True:
     if event == sg.WIN_CLOSED or event == 'Cancel':
         break
 
+    if event =="Switch mode":
+        calc.switch_mode()
+
+
     if event == "Ok":
+        calc = bbmath.pgcalc()
         diameter = float(values[0])
         epsilon = float(values[1])
         theta = float(values[2])
@@ -45,15 +54,14 @@ while True:
         oilr = oilcr / ((np.pi /4) * diameter ** 2) 
         gasr = gascr / ((np.pi /4) * diameter ** 2)
         mr = oilr + gasr
-        lambdal, nfr, nvl = bbmath.get_dimensionless(oilr, gasr, diameter, sigma, roho)
-        rohn, mun = bbmath.get_mix_properties(lambdal, roho, rohg, muo, mug)
-        flowpattern = bbmath.det_flow_pattern(lambdal, nfr, theta)
-        hlo = bbmath.get_liquid_holdup(lambdal, nfr, nvl, theta, flowpattern)
-        ren = bbmath.get_reynold_num(lambdal, rohn, mun, diameter, mr)
-        ff = bbmath.get_friction_factor(ren, diameter, epsilon)
-        ffc = bbmath.correct_friction_f(lambdal, hlo, ff)
-        rohs = bbmath.get_rohs(hlo, roho, rohg)
-        pressure_gradient = bbmath.get_pressure_gradient(ffc, rohn, mr, diameter, rohs, theta)
+        lambdal, nfr, nvl = calc.get_dimensionless(oilr, gasr, diameter, sigma, roho)
+        rohn, mun = calc.get_mix_properties(lambdal, roho, rohg, muo, mug)
+        flowpattern = calc.det_flow_pattern(lambdal, nfr, theta)
+        hlo = calc.get_liquid_holdup(lambdal, nfr, nvl, theta, flowpattern)
+        ren = calc.get_reynold_num(lambdal, rohn, mun, diameter, mr)
+        ff = calc.get_friction_factor(ren, diameter, epsilon)
+        ffc = calc.correct_friction_f(lambdal, hlo, ff)
+        rohs = calc.get_rohs(hlo, roho, rohg)
+        pressure_gradient = calc.get_pressure_gradient(ffc, rohn, mr, diameter, rohs, theta)
         window.extend_layout(window,[[sg.Text("The pressure gradient is {:.2f} Pa/m".format(pressure_gradient))]])
-
 window.close()
