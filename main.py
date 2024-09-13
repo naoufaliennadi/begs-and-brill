@@ -4,20 +4,20 @@ import numpy as np
 
 
 # All the stuff inside your window.
-layout = [[sg.Frame('',[[sg.Button("Switch mode"),sg.Text("Metric")]])],
-          [sg.Text("Pipe diameter"),sg.InputText(size=(10,1)),sg.Text("m")],
-          [sg.Text("Pipe roughness"),sg.InputText(size=(10,1)),sg.Text("m")],
+layout = [[sg.Frame('',[[sg.Button("Switch mode"),sg.Text("Metric",key="unit")]])],
+          [sg.Text("Pipe diameter"),sg.InputText(size=(10,1)),sg.Text("m", key="d1")],
+          [sg.Text("Pipe roughness"),sg.InputText(size=(10,1)),sg.Text("m", key="d2")],
           [sg.Text("Pipe angle"),sg.InputText(size=(10,1)),sg.Text("degrees")],
           [sg.Text("")],
-          [sg.Text("Oil rate"),sg.InputText(size=(10,1)),sg.Text("m^3/s")],
-          [sg.Text("Oil density"),sg.InputText(size=(10,1)),sg.Text("kg/m^3")],
-          [sg.Text("Oil viscosity"),sg.InputText(size=(10,1)),sg.Text("Pa*s")],
+          [sg.Text("Oil rate"),sg.InputText(size=(10,1)),sg.Text("m^3/s", key="vr1")],
+          [sg.Text("Oil density"),sg.InputText(size=(10,1)),sg.Text("kg/m^3", key="de1")],
+          [sg.Text("Oil viscosity"),sg.InputText(size=(10,1)),sg.Text("Pa*s", key="v1")],
           [sg.Text("")],
-          [sg.Text("Gas rate"),sg.InputText(size=(10,1)),sg.Text("m^3/s")],
-          [sg.Text("Gas density"),sg.InputText(size=(10,1)),sg.Text("kg/m^3")],
-          [sg.Text("Gas viscosity"),sg.InputText(size=(10,1)),sg.Text("Pa*s")],
+          [sg.Text("Gas rate"),sg.InputText(size=(10,1)),sg.Text("m^3/s", key="vr2")],
+          [sg.Text("Gas density"),sg.InputText(size=(10,1)),sg.Text("kg/m^3", key="de2")],
+          [sg.Text("Gas viscosity"),sg.InputText(size=(10,1)),sg.Text("Pa*s", key="v2")],
           [sg.Text("")],
-          [sg.Text("Surface tension"),sg.InputText(size=(10,1)),sg.Text("m")],
+          [sg.Text("Surface tension"),sg.InputText(size=(10,1)),sg.Text("N/m", key="s")],
           [sg.Button('Ok'), sg.Button('Cancel')]]
 
 # Create the Window
@@ -25,6 +25,7 @@ window = sg.Window('Hello Example', layout)
 
 # starting the calculator
 calc = bbmath.pgcalc()
+mode = "metric"
 
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
@@ -36,10 +37,32 @@ while True:
 
     if event =="Switch mode":
         calc.switch_mode()
-
+        if mode == "metric":
+            window["unit"].update("Field")
+            window["d1"].update("ft")
+            window["d2"].update("ft")
+            window["s"].update("lbf/ft")
+            window["vr1"].update("ft^3/s")
+            window["vr2"].update("ft^3/s")
+            window["de1"].update("lb/ft^3")
+            window["de2"].update("lb/ft^3")
+            window["v1"].update("cP")
+            window["v2"].update("cP")
+            mode = "field"
+        elif mode == "field":
+            window["unit"].update("Metric")
+            window["d1"].update("m")
+            window["d2"].update("m")
+            window["s"].update("N/m")
+            window["vr1"].update("m^3/s")
+            window["vr2"].update("m^3/s")
+            window["de1"].update("kg/m^3")
+            window["de2"].update("kg/m^3")
+            window["v1"].update("Pa*s")
+            window["v2"].update("Pa*s")
+            mode = "metric"
 
     if event == "Ok":
-        calc = bbmath.pgcalc()
         diameter = float(values[0])
         epsilon = float(values[1])
         theta = float(values[2])

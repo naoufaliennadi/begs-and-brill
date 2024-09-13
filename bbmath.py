@@ -2,8 +2,11 @@ import numpy as np
 
 
 class pgcalc():
-    def __init__(self):
-        self.G = 9.81  # m/s^2
+    def __init__(self, mode="metric"):
+        if mode == "metric":
+            self.G = 9.81  # m/s^2
+        else:
+            self.G = 32.2  # ft/s^2
         self.FP = {
             "segup" : (.98, .04846, .0868, .0110, -3.7680, 3.5390, -1.6140),
             "segdo" : (.98, .04846, .0868, 4.7000, -.3692, .1244, -.05056),
@@ -14,7 +17,10 @@ class pgcalc():
         }
 
     def switch_mode(self):
-        self.G = 32.2  # ft/s^2
+        if self.G == 9.81:
+            self.G = 32.2  # ft/s^2
+        else: 
+            self.G = 9.81
 
 
     def get_dimensionless(self, oil, gas, diameter, sigma, roho):
